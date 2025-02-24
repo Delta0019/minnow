@@ -22,7 +22,6 @@ void Writer::push( string data )
 
 void Writer::close()
 {
-  cout << close_ << endl;
   close_ = true;
 }
 

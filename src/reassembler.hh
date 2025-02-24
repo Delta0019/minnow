@@ -1,6 +1,8 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include <list>
+#include <tuple>
 
 class Reassembler
 {
@@ -34,6 +36,14 @@ public:
   // This function is for testing only; don't add extra state to support it.
   uint64_t count_bytes_pending() const;
 
+  void write_to_output( std::string& data, Writer& writer );
+
+  bool cantain_next_index( uint64_t first_index, uint64_t data_len );
+
+  void pop_from_reassemble_buffer();
+
+  void insert_and_merge( uint64_t first_index, std::string& data );
+
   // Access output stream reader
   Reader& reader() { return output_.reader(); }
   const Reader& reader() const { return output_.reader(); }
@@ -43,4 +53,8 @@ public:
 
 private:
   ByteStream output_;
+  bool had_last_ {};
+  uint64_t next_index_ {};
+  // tuple<first_index, data_len, data>
+  std::list<std::tuple<uint64_t, uint64_t, std::string>> reassember_buffer_ {};
 };
