@@ -27,4 +27,8 @@ public:
 
 private:
   Reassembler reassembler_;
+  // 0-origin, 1-hadSYN, 2-transmitting, 3-hadFIN
+  int64_t status {};
+  Wrap32 zero_point_ { 0 };
+  uint64_t ackno_ {};
 };

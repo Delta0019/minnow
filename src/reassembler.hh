@@ -36,6 +36,14 @@ public:
   // This function is for testing only; don't add extra state to support it.
   uint64_t count_bytes_pending() const;
 
+  // Access output stream reader
+  Reader& reader() { return output_.reader(); }
+  const Reader& reader() const { return output_.reader(); }
+
+  // Access output stream writer, but const-only (can't write from outside)
+  const Writer& writer() const { return output_.writer(); }
+
+protected:
   void write_to_output( std::string& data, Writer& writer );
 
   bool cantain_next_index( uint64_t first_index, uint64_t data_len );
@@ -43,13 +51,6 @@ public:
   void pop_from_reassemble_buffer();
 
   void insert_and_merge( uint64_t first_index, std::string& data );
-
-  // Access output stream reader
-  Reader& reader() { return output_.reader(); }
-  const Reader& reader() const { return output_.reader(); }
-
-  // Access output stream writer, but const-only (can't write from outside)
-  const Writer& writer() const { return output_.writer(); }
 
 private:
   ByteStream output_;
