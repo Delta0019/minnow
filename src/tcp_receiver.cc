@@ -1,6 +1,5 @@
 #include "tcp_receiver.hh"
 #include "debug.hh"
-#include <iostream>
 
 using namespace std;
 
