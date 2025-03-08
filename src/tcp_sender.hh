@@ -4,6 +4,7 @@
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
 
+#include <deque>
 #include <functional>
 
 class TCPSender
@@ -11,7 +12,10 @@ class TCPSender
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */
   TCPSender( ByteStream&& input, Wrap32 isn, uint64_t initial_RTO_ms )
-    : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms )
+    : input_( std::move( input ) )
+    , isn_( isn )
+    , initial_RTO_ms_( initial_RTO_ms )
+    , current_RTO_ms_( initial_RTO_ms )
   {}
 
   /* Generate an empty TCPSenderMessage */
@@ -38,8 +42,17 @@ public:
 
 private:
   Reader& reader() { return input_.reader(); }
+  uint64_t abs_seqno_ {};
+  Wrap32 had_ackno_ { 0 };
+  uint16_t receiver_window_size_ { 1 };
+  // <remain_time(initial set as RTO), message>
+  std::deque<std::pair<uint64_t, TCPSenderMessage>> messages_in_flight_ {};
+  bool is_closed_ {};
+  bool is_fill_ {};
+  uint64_t consecutive_retransmissions_ {};
 
   ByteStream input_;
   Wrap32 isn_;
   uint64_t initial_RTO_ms_;
+  uint64_t current_RTO_ms_;
 };
