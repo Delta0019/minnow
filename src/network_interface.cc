@@ -28,8 +28,6 @@ NetworkInterface::NetworkInterface( string_view name,
 
 void NetworkInterface::send_InternetDatagram( const InternetDatagram& dgram, const uint32_t dst_ip )
 {
-  cout << "----Send IPv4 dgram----" << endl;
-
   EthernetFrame frame;
   frame.header.src = ethernet_address_;
   frame.header.dst = arp_table_[dst_ip].first;
@@ -44,8 +42,6 @@ void NetworkInterface::send_InternetDatagram( const InternetDatagram& dgram, con
 
 void NetworkInterface::send_ARPRequest( const uint32_t dst_ip )
 {
-  cout << "----Send ARP request, dst_ip: " << dst_ip << endl;
-
   ARPMessage arp_request;
   arp_request.opcode = ARPMessage::OPCODE_REQUEST;
 
@@ -64,7 +60,6 @@ void NetworkInterface::send_ARPRequest( const uint32_t dst_ip )
   arp_request.serialize( serializer );
   frame.payload = serializer.finish();
 
-  cout << "ARP request: " << arp_request.to_string() << endl;
   transmit( frame );
   arp_table_waiting_[dst_ip] = 5000;
 }
@@ -89,7 +84,6 @@ void NetworkInterface::send_ARPReply( const uint32_t dst_ip )
   arp_reply.serialize( serializer );
   frame.payload = serializer.finish();
 
-  cout << "----ARP reply: " << arp_reply.to_string() << endl;
   transmit( frame );
 }
 
@@ -140,11 +134,9 @@ void NetworkInterface::recv_frame( EthernetFrame frame )
 
       ARPMessage arp_message;
       arp_message.parse( parser );
-      cout << "Recv ARP: " << arp_message.to_string() << endl;
 
       uint32_t msg_src_ip = arp_message.sender_ip_address;
       EthernetAddress msg_src_mac = arp_message.sender_ethernet_address;
-      cout << "Get IP and ARP: " << msg_src_ip << " ; " << to_string( msg_src_mac ) << endl;
       // Add to ARP table from both ARP request and ARP reply
       arp_table_[msg_src_ip] = pair<EthernetAddress, uint32_t> { msg_src_mac, 30000 };
       arp_table_waiting_.erase( msg_src_ip );
@@ -166,7 +158,6 @@ void NetworkInterface::recv_frame( EthernetFrame frame )
     }
 
     default:
-      debug( "default datagram received" );
       break;
   }
 }
