@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <queue>
+#include <unordered_map>
 
 // A "network interface" that connects IP (the internet layer, or network layer)
 // with Ethernet (the network access layer, or link layer).
@@ -46,6 +47,15 @@ public:
                     const EthernetAddress& ethernet_address,
                     const Address& ip_address );
 
+  // Send an Internet datagram to a given IP address.
+  void send_InternetDatagram( const InternetDatagram& dgram, const uint32_t dst_ip );
+
+  // Send an ARP request to a given IP address.
+  void send_ARPRequest( const uint32_t dst_ip );
+
+  // Send an ARP reply to a given IP address.
+  void send_ARPReply( const uint32_t dst_ip );
+
   // Sends an Internet datagram, encapsulated in an Ethernet frame (if it knows the Ethernet destination
   // address). Will need to use [ARP](\ref rfc::rfc826) to look up the Ethernet destination address for the next
   // hop. Sending is accomplished by calling `transmit()` (a member variable) on the frame.
@@ -69,6 +79,8 @@ public:
 private:
   // Human-readable name of the interface
   std::string name_;
+  uint32_t ARP_TTL_wait = 5000;
+  uint32_t ARP_TTL_store = 30000;
 
   // The physical output port (+ a helper function `transmit` that uses it to send an Ethernet frame)
   std::shared_ptr<OutputPort> port_;
@@ -82,4 +94,13 @@ private:
 
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
+
+  // <IP, <Ethernet, TTL>> mappings
+  std::unordered_map<uint32_t, std::pair<EthernetAddress, uint32_t>> arp_table_ {};
+
+  // <IP, TTL> mappings
+  std::unordered_map<uint32_t, uint32_t> arp_table_waiting_ {};
+
+  // <IP, Datagram> mappings
+  std::unordered_map<uint32_t, std::vector<std::pair<InternetDatagram, uint32_t>>> dgram_table_ {};
 };
