@@ -61,7 +61,7 @@ void NetworkInterface::send_ARPRequest( const uint32_t dst_ip )
   frame.payload = serializer.finish();
 
   transmit( frame );
-  arp_table_waiting_[dst_ip] = 5000;
+  arp_table_waiting_[dst_ip] = ARP_TTL_wait;
 }
 
 void NetworkInterface::send_ARPReply( const uint32_t dst_ip )
@@ -138,7 +138,7 @@ void NetworkInterface::recv_frame( EthernetFrame frame )
       uint32_t msg_src_ip = arp_message.sender_ip_address;
       EthernetAddress msg_src_mac = arp_message.sender_ethernet_address;
       // Add to ARP table from both ARP request and ARP reply
-      arp_table_[msg_src_ip] = pair<EthernetAddress, uint32_t> { msg_src_mac, 30000 };
+      arp_table_[msg_src_ip] = pair<EthernetAddress, uint32_t> { msg_src_mac, ARP_TTL_store };
       arp_table_waiting_.erase( msg_src_ip );
 
       if ( arp_message.opcode == ARPMessage::OPCODE_REQUEST
