@@ -2,6 +2,7 @@
 
 #include "exception.hh"
 #include "network_interface.hh"
+#include "prefix_match_tree.hh"
 
 #include <optional>
 
@@ -34,4 +35,7 @@ public:
 private:
   // The router's collection of network interfaces
   std::vector<std::shared_ptr<NetworkInterface>> interfaces_ {};
+  PrefixMatchTree route_table_ {};
+
+  std::pair<std::optional<Address>, size_t> longest_prefix_match( const uint32_t dst_ip );
 };

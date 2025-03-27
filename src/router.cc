@@ -16,15 +16,33 @@ void Router::add_route( const uint32_t route_prefix,
                         const optional<Address> next_hop,
                         const size_t interface_num )
 {
-  cerr << "DEBUG: adding route " << Address::from_ipv4_numeric( route_prefix ).ip() << "/"
-       << static_cast<int>( prefix_length ) << " => " << ( next_hop.has_value() ? next_hop->ip() : "(direct)" )
-       << " on interface " << interface_num << "\n";
-
-  debug( "unimplemented add_route() called" );
+  route_table_.insert_node( route_prefix, prefix_length, next_hop, interface_num );
+  return;
 }
 
 // Go through all the interfaces, and route every incoming datagram to its proper outgoing interface.
 void Router::route()
 {
-  debug( "unimplemented route() called" );
+  for ( const auto& route_interface : interfaces_ ) {
+    auto& queue = route_interface->datagrams_received();
+    while ( not queue.empty() ) {
+      InternetDatagram dgram = queue.front();
+      queue.pop();
+      if ( dgram.header.ttl <= 1 ) {
+        continue;
+      }
+      dgram.header.ttl -= 1;
+
+      uint32_t dgram_dst_ip = dgram.header.dst;
+      pair<optional<Address>, size_t> tmp = longest_prefix_match( dgram_dst_ip );
+      shared_ptr<NetworkInterface> target_interface = interface( tmp.second );
+      Address next_hop = tmp.first ? tmp.first.value() : Address::from_ipv4_numeric( dgram_dst_ip );
+      target_interface->send_datagram( dgram, next_hop );
+    }
+  }
+}
+
+pair<optional<Address>, size_t> Router::longest_prefix_match( const uint32_t dst_ip )
+{
+  return route_table_.longest_prefix_match( dst_ip );
 }

@@ -47,15 +47,6 @@ public:
                     const EthernetAddress& ethernet_address,
                     const Address& ip_address );
 
-  // Send an Internet datagram to a given IP address.
-  void send_InternetDatagram( const InternetDatagram& dgram, const uint32_t dst_ip );
-
-  // Send an ARP request to a given IP address.
-  void send_ARPRequest( const uint32_t dst_ip );
-
-  // Send an ARP reply to a given IP address.
-  void send_ARPReply( const uint32_t dst_ip );
-
   // Sends an Internet datagram, encapsulated in an Ethernet frame (if it knows the Ethernet destination
   // address). Will need to use [ARP](\ref rfc::rfc826) to look up the Ethernet destination address for the next
   // hop. Sending is accomplished by calling `transmit()` (a member variable) on the frame.
@@ -85,6 +76,15 @@ private:
   // The physical output port (+ a helper function `transmit` that uses it to send an Ethernet frame)
   std::shared_ptr<OutputPort> port_;
   void transmit( const EthernetFrame& frame ) const { port_->transmit( *this, frame ); }
+
+  // Send an ARP request to a given IP address.
+  void send_ARPRequest( const uint32_t dst_ip );
+
+  // Send an Internet datagram to a given IP address.
+  void send_InternetDatagram( const InternetDatagram& dgram, const uint32_t dst_ip );
+
+  // Send an ARP reply to a given IP address.
+  void send_ARPReply( const uint32_t dst_ip );
 
   // Ethernet (known as hardware, network-access-layer, or link-layer) address of the interface
   EthernetAddress ethernet_address_;
